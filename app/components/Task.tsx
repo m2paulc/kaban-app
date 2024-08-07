@@ -7,8 +7,13 @@ export default function Task({ title }: { title: string }) {
 		store.tasks.find((task) => task.title === title)
 	);
 	const deleteTask = useStore((store) => store.deleteTask);
+	const setDraggedTask = useStore((store) => store.setDraggedTask);
 	return (
-		<div className="bg-slate-200 rounded-md p-2 text-black my-4">
+		<div
+			className="bg-slate-200 rounded-md p-2 text-black my-4"
+			draggable
+			onDragStart={() => setDraggedTask(task!.title)}
+		>
 			<div className="flex items-center justify-between p-2">
 				<p>{task?.title}</p>
 				<button onClick={() => deleteTask(title)} className="size-5">

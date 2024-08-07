@@ -1,21 +1,44 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useStore } from "../store";
-import Task from "./Task";
+import { cn } from "@/app/lib/utils";
+import { useStore } from "@/app/store";
+import Task from "@/app/components/Task";
 import { PlusCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function Column({ state }: { state: string }) {
 	const [text, setText] = useState("");
 	const [open, setOpen] = useState(false);
+	const [drop, setDrop] = useState(false);
 	const tasks = useStore((state) => state.tasks);
 	const filteredTasks = useMemo(
 		() => tasks.filter((task) => task.state === state),
 		[tasks, state]
 	);
 	const addTask = useStore((store) => store.addTask);
+	const setDraggedTask = useStore((store) => store.setDraggedTask);
+	const draggedTask = useStore((store) => store.draggedTask);
+	const moveTask = useStore((store) => store.moveTask);
 	return (
-		<div className="bg-slate-600 text-white rounded-md p-2 w-[30%] min-h-44">
+		<div
+			className={cn(
+				"bg-slate-600 text-white rounded-md p-2 w-[30%] min-h-44",
+				drop && "bg-yellow-500"
+			)}
+			onDragOver={(e) => {
+				e.preventDefault();
+				setDrop(true);
+			}}
+			onDragLeave={(e) => {
+				e.preventDefault();
+				setDrop(false);
+			}}
+			onDrop={(e) => {
+				moveTask(draggedTask, state);
+				setDraggedTask("");
+				setDrop(false);
+			}}
+		>
 			<div className="flex items-center justify-start gap-12 m-4">
 				<button
 					onClick={() => setOpen(true)}
