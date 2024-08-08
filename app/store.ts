@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 // Define the shape of a task
 interface Task {
@@ -16,20 +17,38 @@ interface StoreState {
 	moveTask: (title: string, state: string) => void;
 }
 
-export const useStore = create<StoreState>((set) => ({
-	tasks: [],
-	draggedTask: "",
-	addTask: (title, state) =>
-		set((store) => ({ tasks: [...store.tasks, { title, state }] })),
-	deleteTask: (title) =>
-		set((store) => ({
-			tasks: store.tasks.filter((task) => task.title !== title),
+export const useStore = create<StoreState>()(
+	persist(
+		devtools((set) => ({
+			tasks: [],
+			draggedTask: "",
+			addTask: (title, state) =>
+				set(
+					(store) => ({ tasks: [...store.tasks, { title, state }] }),
+					false,
+					"addTask"
+				),
+			deleteTask: (title) =>
+				set(
+					(store) => ({
+						tasks: store.tasks.filter((task) => task.title !== title),
+					}),
+					false,
+					"deleteTask"
+				),
+			setDraggedTask: (title) =>
+				set({ draggedTask: title }, false, "setDraggedTask"),
+			moveTask: (title, state) =>
+				set(
+					(store) => ({
+						tasks: store.tasks.map((task) =>
+							task.title === title ? { ...task, state } : task
+						),
+					}),
+					false,
+					"moveTask"
+				),
 		})),
-	setDraggedTask: (title) => set({ draggedTask: title }),
-	moveTask: (title, state) =>
-		set((store) => ({
-			tasks: store.tasks.map((task) =>
-				task.title === title ? { ...task, state } : task
-			),
-		})),
-}));
+		{ name: "todoStore" }
+	)
+);
